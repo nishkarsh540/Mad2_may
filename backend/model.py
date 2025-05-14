@@ -16,6 +16,10 @@ class User(db.Model):
     password = db.Column(db.String,nullable=False)
     role = db.Column(db.String,default='user')
 
+class Category(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String,unique=True,nullable=False)
+
 
 with app.app_context():
     db.create_all()
