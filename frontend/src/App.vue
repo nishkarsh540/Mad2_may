@@ -2,9 +2,66 @@
   <nav>
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
+
+    <template v-if="isAuthenticated && userRole === 'user'">
+      <router-link to="/user-dashboard"> User Dashboard </router-link>
+    </template>
+    <template v-if="isAuthenticated">
+      <button @click="logout">Logout</button>
+    </template>
   </nav>
-  <router-view/>
+  <router-view />
 </template>
+
+<script>
+import axios from "axios";
+
+export default {
+  data() {
+    return {
+      isAuthenticated: false,
+      userRole: null,
+    };
+  },
+  created() {
+    this.checkAuth();
+  },
+  methods: {
+    checkAuth() {
+      const token = localStorage.getItem("access_token");
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (token && user) {
+        this.isAuthenticated = true;
+        this.userRole = user.role;
+      } else {
+        this.isAuthenticated = false;
+        this.userRole = null;
+      }
+    },
+
+    logout() {
+      const access_token = localStorage.getItem("access_token");
+      axios
+        .post("http://127.0.0.1:5000/api/logout", null, {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        })
+        .then(() => {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("user");
+          this.isAuthenticated = false;
+          this.userRole = null;
+          this.$router.push("/signup");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+  },
+};
+</script>
 
 <style>
 #app {
